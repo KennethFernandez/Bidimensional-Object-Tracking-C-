@@ -11,7 +11,7 @@ class Tracking
 	public:
 		/******************************************************
 		 * 
-		 * Constructor of the class Campbell-Robson with default values
+		 * Constructor of the class Tracking with default values
 		 * 
 		 * **********************************************
 		 * 
@@ -25,6 +25,21 @@ class Tracking
 		 * 		-------
 		 *****/
 		Tracking();
+		/******************************************************
+		 * 
+		 * Constructor of the class Campbell-Robson with default values
+		 * 
+		 * **********************************************
+		 * 
+		 * Inputs: 
+		 * 		-------
+		 * 
+		 * Outputs:
+		 * 		-------
+		 * 
+		 * Restrinctions:
+		 * 		-------
+		 *****/
 	private:
 		
 };
