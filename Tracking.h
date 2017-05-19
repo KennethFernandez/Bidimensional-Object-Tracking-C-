@@ -59,7 +59,7 @@ class Tracking
 		 * Restrinctions:
 		 * 		-------
 		 *****/
-		void DescripMatcher(cv::Mat descriptors_object, cv::Mat descriptors_scene, std::vector< cv::DMatch > matches);
+		void DescripMatcher(cv::Mat descriptors_object, cv::Mat descriptors_scene, std::vector< cv::DMatch > &matches);
 	private:
 		
 };

@@ -19,7 +19,7 @@ void Tracking::KeyDescripExtract(cv::Mat img, std::vector<cv::KeyPoint> &keypoin
 }
 
 
-void Tracking::DescripMatcher(cv::Mat descriptors_object, cv::Mat descriptors_scene, std::vector< cv::DMatch > matches)
+void Tracking::DescripMatcher(cv::Mat descriptors_object, cv::Mat descriptors_scene, std::vector< cv::DMatch > &matches)
 {
 	//-- Step 3: Matching descriptor vectors using FLANN matcher
     cv::Ptr<cv::DescriptorMatcher> matcher = DescriptorMatcher::create("FlannBased");
