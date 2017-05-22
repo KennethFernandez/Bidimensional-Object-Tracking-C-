@@ -65,9 +65,9 @@ int main(int argc, char *argv[])
 
 	// Ask if we have arguments
 	if (argc > 1) {
-		
-		cv::Mat imgObj = imread("./Reference.png", CV_LOAD_IMAGE_GRAYSCALE);
-    		cv::Mat maskObj = imread("./Mask.png", CV_LOAD_IMAGE_GRAYSCALE);
+
+		const cv::Mat imgObj = imread("./Reference.png", CV_LOAD_IMAGE_GRAYSCALE);
+    	const cv::Mat maskObj = imread("./Mask.png", CV_LOAD_IMAGE_GRAYSCALE);
 
    		if (!imgObj.data || !maskObj.data)
 		{
@@ -78,14 +78,15 @@ int main(int argc, char *argv[])
 		std::vector<KeyPoint> keypointsImg, keypointsMask;
  		cv::Mat descriptorsImg, descriptorsMask;
 		std::vector<cv::DMatch> matches;
-
+				cout << "Argumentos" << endl;
 		Tracking trackController = Tracking();
-
+		cout << "Argumentos2" << endl;
 		trackController.KeyDescripExtract(imgObj,keypointsImg,descriptorsImg);
+				cout << "Argumentos5" << endl;
 		trackController.KeyDescripExtract(maskObj,keypointsMask,descriptorsMask);
-
+		cout << "Argumentos3" << endl;
 		trackController.DescripMatcher(descriptorsImg,descriptorsMask,matches);
-
+		cout << "Argumentos4" << endl;
 		trackController.DrawMatches(matches,keypointsImg,keypointsMask,imgObj,maskObj);
 		
 			
