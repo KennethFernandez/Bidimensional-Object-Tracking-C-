@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
 		////***************************** Load Mask section **************************************	
 		// Assign the default value of the mask
-		std::string maskPath = (argc == 3)? std::string(argv[2]): "./Mask.png";
+		std::string maskPath = (argc == 2)? std::string(argv[2]): "./Mask.png";
 		// Load the mask image
     		const cv::Mat maskObj = cv::imread(maskPath, CV_LOAD_IMAGE_GRAYSCALE);
 		// Ask if the images are not empty
@@ -68,6 +68,7 @@ int main(int argc, char *argv[])
 		ConfigFile configController = ConfigFile("./config.tr");
 
 		// If it's 3 is a new mask
+		
 		if(argc == 3){
 			trackController.KeyDescripExtract(maskObj,keypointsMask,descriptorsMask);
 			configController.SaveData(keypointsMask,descriptorsMask);
@@ -84,31 +85,66 @@ int main(int argc, char *argv[])
 		////***************************** Video Section ******************************************
 
 		if(std::string(argv[1])=="-v"){
-
+			int r_int = 0;
+			std::string imageName = "Reference2.png";
+			cv::Mat save_img;
+			cv::Mat reference_img;
+			std::cout << "Press 'y' to take the reference photo" << std::endl;
 			// We take the image from the camera
 			while(true)
-			{
+			{				
+				cv::VideoCapture stream(0);
+    			cv::namedWindow("video",1);
+    			
+       			stream >> save_img;
 
-				// Take a picture
-				//const cv::Mat imgObj = picture;
-				// Ask if the images are not empty
-	   			//if (!imgObj.data)
-				//{
-				//	std::cout << " --(!) Error reading image " << std::endl; 
-				//	return -1;
-			    	//}
-			
-				////***************************** Tracking section **************************************
-				// Get the other descriptor and get the mathes
-				//trackController.KeyDescripExtract(imgObj,keypointsImg,descriptorsImg);
-				//trackController.DescripMatcher(descriptorsImg,descriptorsMask,matches);	
+       			if(save_img.empty())
+      			{
+			    	std::cerr << "Something is wrong with the webcam, could not get frame." << std::endl;
+			    }
+			    cv::imshow("video", save_img);
 
-				// Draw the matches
+			    r_int = cv::waitKey(30);
+
+			    if (r_int == 1048697) { // 'y'
+			    	reference_img = save_img;
+			    	cv::imwrite(imageName, reference_img); // A PNG FILE IS BEING SAVED
+			    	break;
+			    }
+
+			    //std::cout << r_int << std::endl;
+
+       		}
+
+       		////***************************** Tracking section **************************************
+			// Get the other descriptor and get the mathes	
+
+       		cv::Mat save_img2;
+       		trackController.KeyDescripExtract(reference_img,keypointsMask,descriptorsMask);
+       		while(true)
+       		{
+       			cv::VideoCapture stream2(0);
+    			cv::namedWindow("video2",1);
+    			stream2 >> save_img2;
+
+       			if(save_img.empty())
+      			{
+			    	std::cerr << "Something is wrong with the webcam, could not get frame." << std::endl;
+			    }
+			    cv::imshow("video2", save_img2);
+
+			    trackController.KeyDescripExtract(save_img2,keypointsImg,descriptorsImg);
+			    trackController.DescripMatcher(descriptorsImg,descriptorsMask,matches);
+			    trackController.DrawMatches(matches,keypointsImg,keypointsMask,save_img2,reference_img);
+			    cv::waitKey(30);
+       		}
+
+			// Draw the matches
 				// We need a new method to draw the matches in real time
-				////*************************************************************************************
+				////*************************************************************************************			
 				
 				
-			}
+			
 
 
 		}

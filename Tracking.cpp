@@ -1,14 +1,17 @@
 #include "Tracking.h"
 
+
+
 Tracking::Tracking(void) {}
 
 void Tracking::KeyDescripExtract(const cv::Mat img, std::vector<cv::KeyPoint> &keypoints, cv::Mat &descriptors)
 {
 	//-- Step 1: Detect the keypoints using SIFT Detector
-	cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create("ORB");
+	cv::initModule_nonfree();
+	cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create("SIFT");
 	detector->detect(img, keypoints);
 	//-- Step 2: Calculate descriptors (feature vectors)
-	cv::Ptr<cv::DescriptorExtractor> extractor = cv::DescriptorExtractor::create("ORB");
+	cv::Ptr<cv::DescriptorExtractor> extractor = cv::DescriptorExtractor::create("SIFT");
 
 	extractor->compute(img, keypoints, descriptors);
 
@@ -18,7 +21,7 @@ void Tracking::KeyDescripExtract(const cv::Mat img, std::vector<cv::KeyPoint> &k
 void Tracking::DescripMatcher(const cv::Mat descriptorsImg,const cv::Mat descriptorsMask, std::vector<cv::DMatch> &matches)
 {
 	//-- Step 3: Matching descriptor vectors using FLANN matcher
-	cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("BruteForce");
+	cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
 	//-- Step 4: They will be filtered
 	std::vector<cv::DMatch> firstMatches;
 	
@@ -46,11 +49,23 @@ void Tracking::DescripMatcher(const cv::Mat descriptorsImg,const cv::Mat descrip
 void Tracking::DrawMatches(const std::vector<cv::DMatch> matches,const std::vector<cv::KeyPoint> keypointsImg,
 			   const std::vector<cv::KeyPoint> keypointsMask, const cv::Mat imgMat, const cv::Mat maskMat)
 {
-
 	cv::Mat imgMatches;
-	cv::drawMatches(maskMat, keypointsMask, imgMat, keypointsImg,
+	//std::cout << "keypointsMask " <<  keypointsMask.size() << std::endl;
+	//std::cout << "keypointsImg " <<  keypointsImg.size() << std::endl;
+	//std::cout << "matches " <<  matches.size() << std::endl;
+
+	try
+  	{
+    cv::drawMatches(maskMat, keypointsMask, imgMat, keypointsImg,
 			matches, imgMatches, cv::Scalar::all(-1), cv::Scalar::all(-1),
 			std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+  	}
+  	catch (cv::Exception& e)
+  	{
+    //std::cout << "An exception occurred. Exception: " << e.what() << '\n';
+  	}
+	
+	std::cout << "pasa2" << std::endl;
 	//-- Localize the object
 	std::vector<cv::Point2f> img;
 	std::vector<cv::Point2f> mask;
@@ -62,8 +77,9 @@ void Tracking::DrawMatches(const std::vector<cv::DMatch> matches,const std::vect
 		mask.push_back(keypointsMask[matches[i].queryIdx].pt);
 	}
 
+	
 	cv::Mat H = cv::findHomography(mask, img, CV_RANSAC);
-
+	
 	//-- Get the corners from the image_1 ( the object to be "detected" )
 	std::vector<cv::Point2f> maskCorners(4);
 	maskCorners[0] = cvPoint(0, 0); 
@@ -82,7 +98,7 @@ void Tracking::DrawMatches(const std::vector<cv::DMatch> matches,const std::vect
 
 	//-- Show detected matches
 	imshow("Good Matches & Object detection", imgMatches);
-	cv::waitKey(0);
+	//cv::waitKey(30);
 
 }
 
