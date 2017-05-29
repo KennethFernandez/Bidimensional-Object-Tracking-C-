@@ -36,9 +36,12 @@ void Tracking::DescripMatcher(const cv::Mat descriptorsImg,const cv::Mat descrip
 		if (dist > max_dist) max_dist = dist;
 	}
 
+	//std::cout << "min_dist " << min_dist << std::endl;
+	//std::cout << "max_dist " << max_dist << std::endl;
+
 	for (int i = 0; i < descriptorsMask.rows; i++)
 	{
-		if (firstMatches[i].distance <= 5 * min_dist)
+		if (firstMatches[i].distance <= 2 * min_dist)
 		{
 		    matches.push_back(firstMatches[i]);
 		}
@@ -53,19 +56,18 @@ void Tracking::DrawMatches(const std::vector<cv::DMatch> matches,const std::vect
 	//std::cout << "keypointsMask " <<  keypointsMask.size() << std::endl;
 	//std::cout << "keypointsImg " <<  keypointsImg.size() << std::endl;
 	//std::cout << "matches " <<  matches.size() << std::endl;
-
+	// In case something weird happens
 	try
   	{
-    cv::drawMatches(maskMat, keypointsMask, imgMat, keypointsImg,
-			matches, imgMatches, cv::Scalar::all(-1), cv::Scalar::all(-1),
-			std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+	    cv::drawMatches(maskMat, keypointsMask, imgMat, keypointsImg,
+				matches, imgMatches, cv::Scalar::all(-1), cv::Scalar::all(-1),
+				std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
   	}
   	catch (cv::Exception& e)
   	{
-    //std::cout << "An exception occurred. Exception: " << e.what() << '\n';
+    	//std::cout << "An exception occurred. Exception: " << e.what() << '\n';
   	}
 	
-	std::cout << "pasa2" << std::endl;
 	//-- Localize the object
 	std::vector<cv::Point2f> img;
 	std::vector<cv::Point2f> mask;
@@ -77,28 +79,37 @@ void Tracking::DrawMatches(const std::vector<cv::DMatch> matches,const std::vect
 		mask.push_back(keypointsMask[matches[i].queryIdx].pt);
 	}
 
-	
-	cv::Mat H = cv::findHomography(mask, img, CV_RANSAC);
-	
-	//-- Get the corners from the image_1 ( the object to be "detected" )
-	std::vector<cv::Point2f> maskCorners(4);
-	maskCorners[0] = cvPoint(0, 0); 
-	maskCorners[1] = cvPoint(maskMat.cols, 0);
-	maskCorners[2] = cvPoint(maskMat.cols, maskMat.rows); 
-	maskCorners[3] = cvPoint(0, maskMat.rows);
-	std::vector<cv::Point2f> imgCorners(4);
-	
-	cv::perspectiveTransform(maskCorners, imgCorners, H);
+	// In case we don't find the object
+	try 
+	{
+		cv::Mat H = cv::findHomography(mask, img, CV_RANSAC);		
+		//-- Get the corners from the image_1 ( the object to be "detected" )
+		std::vector<cv::Point2f> maskCorners(4);
+		maskCorners[0] = cvPoint(0, 0); 
+		maskCorners[1] = cvPoint(maskMat.cols, 0);
+		maskCorners[2] = cvPoint(maskMat.cols, maskMat.rows); 
+		maskCorners[3] = cvPoint(0, maskMat.rows);
+		std::vector<cv::Point2f> imgCorners(4);
+		
+		cv::perspectiveTransform(maskCorners, imgCorners, H);
 
-	//-- Draw lines between the corners (the mapped object in the scene - image_2 )
-	line(imgMatches, imgCorners[0] + cv::Point2f(maskMat.cols, 0), imgCorners[1] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
-	line(imgMatches, imgCorners[1] + cv::Point2f(maskMat.cols, 0), imgCorners[2] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
-	line(imgMatches, imgCorners[2] + cv::Point2f(maskMat.cols, 0), imgCorners[3] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
-	line(imgMatches, imgCorners[3] + cv::Point2f(maskMat.cols, 0), imgCorners[0] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
+		// cv::Point2f(maskMat.cols, 0)
 
-	//-- Show detected matches
-	imshow("Good Matches & Object detection", imgMatches);
-	//cv::waitKey(30);
+		//-- Draw lines between the corners (the mapped object in the scene - image_2 )
+		line(imgMatches, imgCorners[0] + cv::Point2f(maskMat.cols, 0), imgCorners[1] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
+		line(imgMatches, imgCorners[1] + cv::Point2f(maskMat.cols, 0), imgCorners[2] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
+		line(imgMatches, imgCorners[2] + cv::Point2f(maskMat.cols, 0), imgCorners[3] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
+		line(imgMatches, imgCorners[3] + cv::Point2f(maskMat.cols, 0), imgCorners[0] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
+
+		//-- Show detected matches
+		imshow("Good Matches & Object detection", imgMatches);
+		cv::imwrite("Match.png", imgMatches);
+		//cv::waitKey(0);
+	}
+	catch (cv::Exception& e)
+  	{
+    	//std::cout << "An exception occurred. Exception: " << e.what() << '\n';
+  	}
 
 }
 
