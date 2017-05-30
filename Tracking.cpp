@@ -96,10 +96,18 @@ void Tracking::DrawMatches(const std::vector<cv::DMatch> matches,const std::vect
 		// cv::Point2f(maskMat.cols, 0)
 
 		//-- Draw lines between the corners (the mapped object in the scene - image_2 )
+		std::cout << "Corner0 " << imgCorners[0].x << " " << imgCorners[0].y << std::endl;
+		std::cout << "Corner1 " << imgCorners[1].x << " " << imgCorners[1].y << std::endl;
+		std::cout << "Corner2 " << imgCorners[2].x << " " << imgCorners[2].y << std::endl;
+		std::cout << "Corner3 " << imgCorners[3].x << " " << imgCorners[3].y << std::endl;
+		std::cout << "Shift X " << maskMat.cols << std::endl;
+
+		int shiftY = -0.6*maskMat.rows;
+
 		line(imgMatches, imgCorners[0] + cv::Point2f(maskMat.cols, 0), imgCorners[1] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
-		line(imgMatches, imgCorners[1] + cv::Point2f(maskMat.cols, 0), imgCorners[2] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
-		line(imgMatches, imgCorners[2] + cv::Point2f(maskMat.cols, 0), imgCorners[3] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
-		line(imgMatches, imgCorners[3] + cv::Point2f(maskMat.cols, 0), imgCorners[0] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
+		line(imgMatches, imgCorners[1] + cv::Point2f(maskMat.cols, 0), imgCorners[2] + cv::Point2f(maskMat.cols, shiftY), cv::Scalar(0, 255, 0), 4);
+		line(imgMatches, imgCorners[2] + cv::Point2f(maskMat.cols, shiftY), imgCorners[3] + cv::Point2f(maskMat.cols, shiftY), cv::Scalar(0, 255, 0), 4);
+		line(imgMatches, imgCorners[3] + cv::Point2f(maskMat.cols, shiftY), imgCorners[0] + cv::Point2f(maskMat.cols, 0), cv::Scalar(0, 255, 0), 4);
 
 		//-- Show detected matches
 		imshow("Good Matches & Object detection", imgMatches);
